@@ -20,6 +20,10 @@ public class SeleniumConfig {
     public RemoteWebDriver webDriver() throws URISyntaxException, MalformedURLException {
         URL url = new URI(gridUrl).toURL();
         ChromeOptions chromeOptions = new ChromeOptions();
+        chromeOptions.addArguments("--headless");
+        chromeOptions.addArguments("--no-sandbox");
+        chromeOptions.addArguments("--disable-dev-shm-usage");
+        chromeOptions.setCapability("browserName", "chrome");
         return new RemoteWebDriver(url,chromeOptions);
     }
 }
