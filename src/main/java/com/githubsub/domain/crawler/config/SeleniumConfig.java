@@ -1,5 +1,6 @@
 package com.githubsub.domain.crawler.config;
 
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,7 +18,7 @@ public class SeleniumConfig {
     private String gridUrl;
 
     @Bean
-    public RemoteWebDriver webDriver() throws URISyntaxException, MalformedURLException {
+    public WebDriver webDriver() throws URISyntaxException, MalformedURLException {
         URL url = new URI(gridUrl).toURL();
         ChromeOptions chromeOptions = new ChromeOptions();
         chromeOptions.addArguments("--headless");

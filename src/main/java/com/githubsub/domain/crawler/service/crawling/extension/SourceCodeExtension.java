@@ -18,13 +18,13 @@ public enum SourceCodeExtension {
         this.language = language;
     }
 
-    public static boolean fromExtension(String extension){
+    public static SourceCodeExtension fromExtension(String extension){
         for(SourceCodeExtension ex : values()){
             if(ex.getExtension().equals(extension)){
-                return true;
+                return ex;
             }
         }
-        return false;
+        return null;
     }
 
 }
