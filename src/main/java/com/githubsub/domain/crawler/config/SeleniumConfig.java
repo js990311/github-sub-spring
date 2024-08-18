@@ -1,5 +1,6 @@
 package com.githubsub.domain.crawler.config;
 
+import com.githubsub.domain.crawler.service.crawling.driver.factory.WebDriverFactory;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -18,13 +19,7 @@ public class SeleniumConfig {
     private String gridUrl;
 
     @Bean
-    public WebDriver webDriver() throws URISyntaxException, MalformedURLException {
-        URL url = new URI(gridUrl).toURL();
-        ChromeOptions chromeOptions = new ChromeOptions();
-        chromeOptions.addArguments("--headless");
-        chromeOptions.addArguments("--no-sandbox");
-        chromeOptions.addArguments("--disable-dev-shm-usage");
-        chromeOptions.setCapability("browserName", "chrome");
-        return new RemoteWebDriver(url,chromeOptions);
+    public WebDriverFactory webDriverFactory(){
+        return new WebDriverFactory(gridUrl);
     }
 }

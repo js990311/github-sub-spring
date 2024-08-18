@@ -2,6 +2,7 @@ package com.githubsub.domain.crawler.service.crawling;
 
 import com.githubsub.domain.crawler.dto.GitRepositoryDto;
 import com.githubsub.domain.crawler.dto.SourceCodeDto;
+import com.githubsub.domain.crawler.service.crawling.driver.factory.WebDriverFactory;
 import com.githubsub.domain.crawler.service.crawling.extension.SourceCodeExtension;
 import com.githubsub.domain.crawler.service.crawling.utils.GitUrlUtils;
 import org.checkerframework.checker.units.qual.N;
@@ -16,38 +17,34 @@ import java.util.regex.Pattern;
 
 @Component
 public class GitRepositoryCrawler implements Crawler<GitRepositoryDto> {
-    private final WebDriver webDriver;
+    private final WebDriverFactory webDriverFactory;
     private final GitSourceCodeCrawler codeCrawler;
     private final GitUrlUtils gitUrlUtils;
 
-    public GitRepositoryCrawler(WebDriver webDriver, GitSourceCodeCrawler codeCrawler, GitUrlUtils gitUrlUtils) {
-        this.webDriver = webDriver;
+    public GitRepositoryCrawler(WebDriverFactory webDriverFactory, GitSourceCodeCrawler codeCrawler, GitUrlUtils gitUrlUtils) {
+        this.webDriverFactory = webDriverFactory;
         this.codeCrawler = codeCrawler;
         this.gitUrlUtils = gitUrlUtils;
     }
 
     @Override
     public GitRepositoryDto crawling(String url) {
-        try {
-            Queue<String > directories = new LinkedList<>();
-            List<SourceCodeDto> sourceCodes = new ArrayList<>();
-            Set<String> isVisit = new HashSet<>();
-            directories.add(url);
+        WebDriver webDriver = webDriverFactory.getWebDriver();
+        Queue<String > directories = new LinkedList<>();
+        List<SourceCodeDto> sourceCodes = new ArrayList<>();
+        Set<String> isVisit = new HashSet<>();
+        directories.add(url);
 
-            while (!directories.isEmpty()){
-                String  front = directories.poll();
-                search(front,directories, sourceCodes, isVisit);
-            }
+        while (!directories.isEmpty()){
+            String  front = directories.poll();
+            search(front,directories, sourceCodes, isVisit);
+        }
 
-            return GitRepositoryDto.builder()
-                    .name(null)
-                    .url(url)
-                    .codes(sourceCodes)
-                    .build();
-        }
-        finally {
-            webDriver.close();
-        }
+        return GitRepositoryDto.builder()
+                .name(null)
+                .url(url)
+                .codes(sourceCodes)
+                .build();
     }
 
     /**
@@ -59,6 +56,7 @@ public class GitRepositoryCrawler implements Crawler<GitRepositoryDto> {
      * @return
      */
     private void search(String url, Queue<String> directories, List<SourceCodeDto> codes, Set<String> isVisit){
+        WebDriver webDriver = webDriverFactory.getWebDriver();
         webDriver.get(url);
         WebElement table = webDriver.findElement(By.tagName("table"));
         List<WebElement> links = table.findElements(By.tagName("a"));

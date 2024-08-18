@@ -15,7 +15,6 @@ class GitSourceCodeCrawlerTest {
     @Test
     void crawling() {
         SourceCodeDto crawling = codeCrawler.crawling("https://github.com/js990311/spring-shortener/blob/develop/src/main/java/com/toyproject/shortener/aop/MethodTimeCheckerAdvice.java");
-
         assertEquals(crawling.getExtension(), SourceCodeExtension.JAVA);
     }
 }
