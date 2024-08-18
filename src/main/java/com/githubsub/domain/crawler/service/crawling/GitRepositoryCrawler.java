@@ -1,5 +1,6 @@
 package com.githubsub.domain.crawler.service.crawling;
 
+import com.githubsub.domain.crawler.aop.annotation.UseWebDriver;
 import com.githubsub.domain.crawler.dto.GitRepositoryDto;
 import com.githubsub.domain.crawler.dto.SourceCodeDto;
 import com.githubsub.domain.crawler.service.crawling.driver.factory.WebDriverFactory;
@@ -27,6 +28,7 @@ public class GitRepositoryCrawler implements Crawler<GitRepositoryDto> {
         this.gitUrlUtils = gitUrlUtils;
     }
 
+    @UseWebDriver
     @Override
     public GitRepositoryDto crawling(String url) {
         WebDriver webDriver = webDriverFactory.getWebDriver();

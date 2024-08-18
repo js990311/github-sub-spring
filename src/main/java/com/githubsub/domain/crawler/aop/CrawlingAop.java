@@ -1,5 +1,7 @@
 package com.githubsub.domain.crawler.aop;
 
+import com.githubsub.domain.crawler.service.crawling.driver.factory.WebDriverFactory;
+import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -7,8 +9,11 @@ import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
 
 @Aspect
+@RequiredArgsConstructor
 @Component
 public class CrawlingAop {
+
+    private final WebDriverFactory webDriverFactory;
 
     @Around("@annotation(com.githubsub.domain.crawler.aop.annotation.RetryCrawling)")
     public Object retryCrawling(ProceedingJoinPoint joinPoint) throws InterruptedException {
@@ -27,8 +32,18 @@ public class CrawlingAop {
         throw new RuntimeException();
     }
 
-    @Around("@annotation(com.githubsub.domain.crawler.aop.annotation.CreateWebDriver)")
+    @Around("@annotation(com.githubsub.domain.crawler.aop.annotation.UseWebDriver)")
     public Object createWebDriver(ProceedingJoinPoint joinPoint) throws Throwable {
-        return joinPoint.proceed();
+        boolean createWebDriver = false;
+        try {
+            createWebDriver = webDriverFactory.createDriver();
+            return joinPoint.proceed();
+        }catch (Exception e){
+            throw e;
+        }finally {
+            if(createWebDriver){
+                webDriverFactory.closeDriver();
+            }
+        }
     }
 }

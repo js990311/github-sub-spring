@@ -26,13 +26,13 @@ public class WebDriverFactory {
     public WebDriver getWebDriver() {
         WebDriver webDriver = threadLocal.get();
         if(webDriver == null){
-            webDriver = createDriver();
+            webDriver = _createDriver();
             threadLocal.set(webDriver);
         }
         return webDriver;
     }
 
-    private WebDriver createDriver(){
+    private WebDriver _createDriver(){
         try {
             URL url = new URI(gridUrl).toURL();
             ChromeOptions chromeOptions = new ChromeOptions();
@@ -45,6 +45,25 @@ public class WebDriverFactory {
         }catch (Exception e){
             log.warn(e.getMessage());
             throw new CannotCreateWebDriverException();
+        }
+    }
+
+    public boolean createDriver(){
+        WebDriver webDriver = threadLocal.get();
+        if(webDriver == null){
+            webDriver = _createDriver();
+            threadLocal.set(webDriver);
+            return true;
+        }else {
+            return false;
+        }
+    }
+
+    public void closeDriver() {
+        WebDriver webDriver = threadLocal.get();
+        if (webDriver != null) {
+            threadLocal.set(null);
+            webDriver.quit();
         }
     }
 }

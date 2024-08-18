@@ -1,6 +1,7 @@
 package com.githubsub.domain.crawler.service.crawling;
 
 import com.githubsub.domain.crawler.aop.annotation.RetryCrawling;
+import com.githubsub.domain.crawler.aop.annotation.UseWebDriver;
 import com.githubsub.domain.crawler.dto.SourceCodeDto;
 import com.githubsub.domain.crawler.service.crawling.driver.factory.WebDriverFactory;
 import com.githubsub.domain.crawler.service.crawling.extension.SourceCodeExtension;
@@ -22,6 +23,7 @@ public class GitSourceCodeCrawler implements Crawler<SourceCodeDto> {
     private final WebDriverFactory webDriverFactory;
     private final GitUrlUtils gitUrlUtils;
 
+    @UseWebDriver
     @Override
     public SourceCodeDto crawling(String url) {
         WebDriver webDriver = webDriverFactory.getWebDriver();
