@@ -40,7 +40,9 @@ public class WebDriverFactory {
             chromeOptions.addArguments("--no-sandbox");
             chromeOptions.addArguments("--disable-dev-shm-usage");
             chromeOptions.setCapability("browserName", "chrome");
-            WebDriver webDriver = new  RemoteWebDriver(url,chromeOptions);
+            WebDriver webDriver;
+            webDriver = new RemoteWebDriver(url,chromeOptions);
+            webDriver.manage().timeouts().implicitlyWait(Duration.ofSeconds(30));
             return webDriver;
         }catch (Exception e){
             log.warn(e.getMessage());
@@ -62,7 +64,7 @@ public class WebDriverFactory {
     public void closeDriver() {
         WebDriver webDriver = threadLocal.get();
         if (webDriver != null) {
-            threadLocal.set(null);
+            threadLocal.remove();
             webDriver.quit();
         }
     }

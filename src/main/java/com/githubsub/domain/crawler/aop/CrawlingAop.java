@@ -22,8 +22,9 @@ public class CrawlingAop {
             try {
                 return joinPoint.proceed();
             } catch (Throwable e) {
-                Thread.sleep(500);
+            }finally {
                 retry++;
+                Thread.sleep(500);
                 if(retry>=5){
                     break;
                 }

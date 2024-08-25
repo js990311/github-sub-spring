@@ -1,11 +1,13 @@
 package com.githubsub.domain.crawler.service.crawling;
 
+import com.githubsub.domain.crawler.aop.annotation.RetryCrawling;
 import com.githubsub.domain.crawler.aop.annotation.UseWebDriver;
 import com.githubsub.domain.crawler.dto.GitRepositoryDto;
 import com.githubsub.domain.crawler.dto.SourceCodeDto;
 import com.githubsub.domain.crawler.service.crawling.driver.factory.WebDriverFactory;
 import com.githubsub.domain.crawler.service.crawling.extension.SourceCodeExtension;
 import com.githubsub.domain.crawler.service.crawling.utils.GitUrlUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.units.qual.N;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -16,6 +18,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Slf4j
 @Component
 public class GitRepositoryCrawler implements Crawler<GitRepositoryDto> {
     private final WebDriverFactory webDriverFactory;
@@ -31,15 +34,19 @@ public class GitRepositoryCrawler implements Crawler<GitRepositoryDto> {
     @UseWebDriver
     @Override
     public GitRepositoryDto crawling(String url) {
-        WebDriver webDriver = webDriverFactory.getWebDriver();
         Queue<String > directories = new LinkedList<>();
         List<SourceCodeDto> sourceCodes = new ArrayList<>();
+        List<String> codeUrls = new ArrayList<>();
         Set<String> isVisit = new HashSet<>();
         directories.add(url);
 
         while (!directories.isEmpty()){
             String  front = directories.poll();
-            search(front,directories, sourceCodes, isVisit);
+            search(front,directories, codeUrls, isVisit);
+        }
+
+        for(String codeUrl : codeUrls){
+            sourceCodes.add(codeCrawler.crawling(codeUrl));
         }
 
         return GitRepositoryDto.builder()
@@ -53,32 +60,34 @@ public class GitRepositoryCrawler implements Crawler<GitRepositoryDto> {
      *
      * @param url
      * @param directories
-     * @param codes
+     * @param codeUrls
      * @param isVisit
      * @return
      */
-    private void search(String url, Queue<String> directories, List<SourceCodeDto> codes, Set<String> isVisit){
+    private void search(String url, Queue<String> directories, List<String> codeUrls, Set<String> isVisit){
         WebDriver webDriver = webDriverFactory.getWebDriver();
         webDriver.get(url);
-        WebElement table = webDriver.findElement(By.tagName("table"));
-        List<WebElement> links = table.findElements(By.tagName("a"));
-
+        List<WebElement> links = webDriver.findElements(By.className("react-directory-row-name-cell-large-screen"));
         for(WebElement link : links){
-            String href = link.getAttribute("href");
+            try {
+                String href = link.findElement(By.tagName("a")).getAttribute("href");
 
-            // isVisit
-            if(isVisit.contains(href)){
-               continue;
-            }else {
-                isVisit.add(href);
-            }
+                // isVisit
+                if(isVisit.contains(href)){
+                    continue;
+                }else {
+                    isVisit.add(href);
+                }
 
-            // 코드인지 디렉토리인지 검사
-            SourceCodeExtension extension = gitUrlUtils.findExtension(href);
-            if(extension != null){
-                codes.add(codeCrawler.crawling(href));
-            }else if(gitUrlUtils.isTree(href)){
-                directories.add(href);
+                // 코드인지 디렉토리인지 검사
+                SourceCodeExtension extension = gitUrlUtils.findExtension(href);
+                if(extension != null){
+                    codeUrls.add(href);
+                }else if(gitUrlUtils.isTree(href)){
+                    directories.add(href);
+                }
+            }catch (Exception e){
+                log.warn(e.getMessage());
             }
         }
     }

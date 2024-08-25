@@ -19,6 +19,7 @@ class GitRepositoryCrawlerTest {
     void crawling() {
         GitRepositoryDto crawling = repositoryCrawler.crawling("https://github.com/js990311/spring-shortener");
         assertNotEquals(0, crawling.getCodes().size());
+        assertEquals(23, crawling.getCodes().size());
     }
 
 }
